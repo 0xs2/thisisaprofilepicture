@@ -1,0 +1,4 @@
+node_modules
+public/pix/*
+package-lock.json
+pfp.db

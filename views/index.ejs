@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>This is a Profile Picture</title>
+    <meta name="author" content="sui">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="title" content="This is a Profile Picture">
+    <meta name="description" content="This is a Profile Picture is a website that indexes Profile Pictures then displays them">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <link rel="canonical" href="https://thisisaprofilepicture.com">
+    <link rel="icon" type="image/png" href="https://thisisaprofilepicture.com/pix/<%= result['src'] %>">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+</head>
+<body><img id="pfp" src="pix/<%= result['src'] %>" title="<%= result['title'] %>" alt="<%= result['title'] %>">
+<div class="info">
+</div>
+</body>
+</html>
