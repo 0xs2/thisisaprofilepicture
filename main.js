@@ -41,7 +41,6 @@ app.get("/api", (req,res) => {
 });
 
 
-
 app.get("/api/sources", (req,res) => {
         getSources(db).then(rows => { 
         let results = [];
@@ -71,7 +70,7 @@ const randomQuery = (db) => {
 const getSources = (db) => {
         return new Promise((resolve, reject)=>{
         
-        sql = `SELECT url FROM pfp;`;
+        sql = `SELECT url FROM pfp group by url;`;
         db.all(sql, [], (err, rows) => {
                 if (err)
                 reject(err)

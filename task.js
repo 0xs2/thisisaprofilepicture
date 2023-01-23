@@ -39,7 +39,8 @@ function createTables(newdb) {
     src text not null,
     height text not null,
     width text not null,
-    date text not null
+    date text not null,
+    unique (src)
     );
     create table logs (
     id INTEGER PRIMARY KEY not null,
@@ -93,7 +94,7 @@ function log(db, type, msg) {
         else {
             console.log("tiapfp : created log record " + moment().valueOf());
         }
-    }).catch(err => console.log(`tiapfp : log issue : ${err}`));
+    })
 }
 
 function save(db, params) {
@@ -110,7 +111,7 @@ function save(db, params) {
                 .then(data => {    
                     let src = Base64.encode(Buffer.from(data, 'base64'));
 
-                    sql = `insert into pfp (source, title, url, src, height, width, date) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+                    sql = `insert or replace into pfp (source, title, url, src, height, width, date) VALUES (?, ?, ?, ?, ?, ?, ?)`;
                     db.run(sql, [params[0], params[1], url, src, params[3], params[4], params[5]], (err) => {
                         if(err) { log(db, "insert error", err.message) }
                     });
