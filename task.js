@@ -89,10 +89,7 @@ function log(db, type, msg) {
     sql = `insert into logs (type, msg, date) VALUES (?, ?, ?, ?)`;
     db.run(sql, [type, msg, moment.unix()], (err) => {
         if(err) {
-            return console.log(err.message);
-        }
-        else {
-            console.log("tiapfp : created log record " + moment().valueOf());
+            return  console.log("tiapfp : log insert error");
         }
     })
 }
@@ -113,9 +110,9 @@ function save(db, params) {
 
                     sql = `insert or replace into pfp (source, title, url, src, height, width, date) VALUES (?, ?, ?, ?, ?, ?, ?)`;
                     db.run(sql, [params[0], params[1], url, src, params[3], params[4], params[5]], (err) => {
-                        if(err) { log(db, "insert error", err.message) }
+                        if(err) { log(db, "db insert error", err.message) }
                     });
-                }).catch (err => log(db, "axios error", err))
+                }).catch (err => log(db, "sharp error", err))
             }
         }
         catch (err) { log(db, "axios error", err) }
