@@ -1,6 +1,7 @@
 const express = require("express");
 const compression = require("compression");
 const helmet = require("helmet");
+const exec = require('child_process');
 const parseUrl = require('parse-url');
 const sqlite3 = require('sqlite3');
 const app = express()
@@ -37,8 +38,10 @@ app.get("/", (req,res) => {
 });
 
 app.get("/api", (req,res) => {
-        randomQuery(db).then(r => { return res.json(r)});
+        randomQuery(db).then(r => { return res.json(r[0])});
 });
+
+
 
 app.get("/api/sources", (req,res) => {
         getSources(db).then(rows => { 
@@ -57,7 +60,7 @@ app.get("/api/sources", (req,res) => {
 
 const randomQuery = (db) => {
         return new Promise((resolve, reject)=>{
-        sql = `SELECT id,title,src,height,width FROM pfp ORDER BY RANDOM() LIMIT 1;`;
+        sql = `SELECT id,title,src FROM pfp ORDER BY RANDOM() LIMIT 1;`;
         db.all(sql, [], (err, row) => {
                 if (err)
                 reject(err)
@@ -69,7 +72,7 @@ const randomQuery = (db) => {
 const getSources = (db) => {
         return new Promise((resolve, reject)=>{
         
-        sql = `SELECT distinct(url) FROM pfp;`;
+        sql = `SELECT url FROM pfp;`;
         db.all(sql, [], (err, rows) => {
                 if (err)
                 reject(err)

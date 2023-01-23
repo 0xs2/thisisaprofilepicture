@@ -1,9 +1,14 @@
 const {image_search } = require("duckduckgo-images-api");
-const keywords = require("./keywords.json");
+const data = require("./data.json");
 const sqlite3 = require('sqlite3');
-const download = require('image-downloader');
-const webp = require('webp-converter');
-const fs = require('fs');
+const sharp = require('sharp');
+const axios = require('axios');
+const {Base64} = require('js-base64');
+const moment = require('moment');
+const UserAgent = require("user-agents");
+const userAgent = new UserAgent();
+
+
 const db = new sqlite3.Database('./pfp.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err && err.code == "SQLITE_CANTOPEN") {
         createDatabase();
@@ -33,15 +38,23 @@ function createTables(newdb) {
     url text not null,
     src text not null,
     height text not null,
-    width text not null
-    );`, ()  => {
-        console.log("First time run: created database and tables, please rerun this then start 'main.js'");
-        process.exit(1);
+    width text not null,
+    date text not null
+    );
+    create table logs (
+    id INTEGER PRIMARY KEY not null,
+    type text not null,
+    msg text not null,
+    date text not null
+    );
+    `, ()  => {
+            console.log("First time run: created database and tables, please rerun this then start 'main.js'");
+            process.exit(1);
     });
 }
 
 function search(){
-    let q = [`${rand(keywords['colors'])}`, `${rand(keywords['term'])}`,`${rand(keywords['terms'])}`, `${rand(keywords['obj'])}`,`${rand(keywords['src'])}`,`${rand(keywords['social'])}`];
+    let q = [`${rand(data['colors'])}`, `${rand(data['term'])}`,`${rand(data['terms'])}`, `${rand(data['obj'])}`,`${rand(data['src'])}`,`${rand(data['social'])}`];
     return shuffle(q).join(' ');
 }
 
@@ -64,49 +77,47 @@ function collectImages() {
     image_search({ query: search(), moderate: true ,iterations :5, retries:10 }).then(
     r => {  
     for (let resultSet of r){
-        if(resultSet['width'] >= 128 && resultSet['height'] >= 128 && resultSet['width'] <= 1028 && resultSet['height'] <= 1028 && resultSet['width'] == resultSet['height']) {
-            save(db, [resultSet['source'], resultSet['title'], resultSet['image'], resultSet['height'], resultSet['width']]);
+	        if(resultSet['width'] >= 128 && resultSet['height'] >= 128 && resultSet['width'] <= 1028 && resultSet['height'] <= 1028 && resultSet['width'] == resultSet['height']) {
+            save(db, [resultSet['source'], resultSet['title'], resultSet['image'], resultSet['height'], resultSet['width'], moment().unix()]);
         }
     }
     })
 }
 
-function parseFilename(filename) {
-    let f = filename.split("/");
-    return f[f.length - 1]
+function log(db, type, msg) {
+    sql = `insert into logs (type, msg, date) VALUES (?, ?, ?, ?)`;
+    db.run(sql, [type, msg, moment.unix()], (err) => {
+        if(err) {
+            return console.log(err.message);
+        }
+        else {
+            console.log("tiapfp : created log record " + moment().valueOf());
+        }
+    }).catch(err => console.log(`tiapfp : log issue : ${err}`));
 }
 
 function save(db, params) {
     let url = params[2];
-    options = {
-        url: url,
-        dest: `../../public/pix/`
-      };
+    axios({url: url, responseType: "arraybuffer", headers: { 'User-Agent': userAgent.toString() }})
+    .then(function(response) {
+        try {
+            if(response.status == 200) {
+                sharp(Buffer.from(response.data))
+                .webp({
+                    quality: 60
+                })
+                .toBuffer()
+                .then(data => {    
+                    let src = Base64.encode(Buffer.from(data, 'base64'));
 
-      download.image(options)
-        .then(({ filename }) => {
-            let f = parseFilename(`${filename.split(".")[0]}.webp`);
-
-            sql = `insert into pfp (source, title, url, src, height, width) VALUES (?, ?, ?, ?, ?, ?)`;
-            db.run(sql, [params[0], params[1], url, f, params[3], params[4]], (err) => {
-                if(err) return console.log(err.message);
-            });
-            convertImage(filename)
-        })
-        .catch((err) => console.log(`Error getting image ${url} not saved.`));
-}
-
-function convertImage(img) {
-    let i = img.split(".");
-
-    if(i[1] == 'gif') {
-        result = webp.gwebp(img, `${i[0]}.webp`,"-q 60");  
-    }
-    else {
-        result = webp.cwebp(img, `${i[0]}.webp`,"-q 60");
-    }
-
-    result.then((response) => {
-        fs.unlinkSync(img)
-    })
+                    sql = `insert into pfp (source, title, url, src, height, width, date) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+                    db.run(sql, [params[0], params[1], url, src, params[3], params[4], params[5]], (err) => {
+                        if(err) { log(db, "insert error", err.message) }
+                    });
+                }).catch (err => log(db, "axios error", err))
+            }
+        }
+        catch (err) { log(db, "axios error", err) }
+    });
+    
 }
