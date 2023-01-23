@@ -1,7 +1,6 @@
 const express = require("express");
 const compression = require("compression");
 const helmet = require("helmet");
-const exec = require('child_process');
 const parseUrl = require('parse-url');
 const sqlite3 = require('sqlite3');
 const app = express()
