@@ -20,14 +20,16 @@
         "colorful",
         "neon",
         "dark",
-        "black and white"
+        "black and white",
+        "tv static"
     ],
     "social": [
         "discord",
         "tumblr",
         "twitter",
         "pinterest",
-        "instagram"
+        "instagram",
+        "snapchat"
     ],
     "term": [
         "cool",
@@ -52,6 +54,7 @@
     ],
     "terms": [
         "aesthetic",
+        "simplistic",
         "grunge",
         "emo",
         "gore",
@@ -62,23 +65,41 @@
         "ghost",
         "shadow",
         "alone",
+        "666",
         "scene",
         "goth",
         "edgy",
         "satanic",
+        "flowers",
+        "roses",
+        "business",
+        "city",
+        "fancy",
+        "art",
         "tech",
         "programmer",
         "gamer",
         "retro",
         "vintage",
+        "futuristic",
+        "1980s",
+        "1970s",
+        "rock",
+        "rockstar",
         "nostalgia",
-        "nostalgic"
+        "nostalgic",
+        "y2k",
+        "pixel",
+        "nft",
+        "pixelart"
     ],
     "obj": [
         "girl",
         "boy",
         "anime boy",
-        "anime girl"
+        "anime girl",
+        "cartoon boy",
+        "cartoon girl"
     ],
     "src": [
         "pfp",

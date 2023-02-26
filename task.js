@@ -3,12 +3,10 @@ const data = require("./data.json");
 const sqlite3 = require('sqlite3');
 const sharp = require('sharp');
 const axios = require('axios');
-const {Base64} = require('js-base64');
 const moment = require('moment');
 const UserAgent = require("user-agents");
 const userAgent = new UserAgent();
-
-
+const randomstring = require("randomstring");
 const db = new sqlite3.Database('./pfp.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err && err.code == "SQLITE_CANTOPEN") {
         createDatabase();
@@ -86,10 +84,10 @@ function collectImages() {
 }
 
 function log(db, type, msg) {
-    sql = `insert into logs (type, msg, date) VALUES (?, ?, ?, ?)`;
+    sql = `insert into logs (type, msg, date) VALUES (?, ?, ?)`;
     db.run(sql, [type, msg, moment.unix()], (err) => {
         if(err) {
-            return  console.log("tiapfp : log insert error");
+           return console.log("tiapfp : log insert error " + err);
         }
     })
 }
@@ -100,19 +98,20 @@ function save(db, params) {
     .then(function(response) {
         try {
             if(response.status == 200) {
+                let src = `${randomstring.generate(20)}.webp`;
+
                 sharp(Buffer.from(response.data))
                 .webp({
                     quality: 60
                 })
-                .toBuffer()
-                .then(data => {    
-                    let src = Base64.encode(Buffer.from(data, 'base64'));
-
+                .toFile(`./public/pix/${src}`, (err, info) => {
                     sql = `insert or replace into pfp (source, title, url, src, height, width, date) VALUES (?, ?, ?, ?, ?, ?, ?)`;
                     db.run(sql, [params[0], params[1], url, src, params[3], params[4], params[5]], (err) => {
                         if(err) { log(db, "db insert error", err.message) }
                     });
-                }).catch (err => log(db, "sharp error", err))
+                    if(err) { log(db, "db insert error", err.message) }
+
+                 }); 
             }
         }
         catch (err) { log(db, "axios error", err) }

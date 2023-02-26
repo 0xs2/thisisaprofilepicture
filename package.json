@@ -1,6 +1,6 @@
 {
   "name": "tiapfp",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Get a PFP for things like Discord, instagram, etc.",
   "main": "main.js",
   "scripts": {
@@ -19,8 +19,9 @@
     "ejs": "^3.1.8",
     "express": "^4.18.2",
     "helmet": "^6.0.1",
-    "js-base64": "^3.7.4",
     "moment": "^2.29.4",
+    "parse-url": "^8.1.0",
+    "randomstring": "^1.2.3",
     "sharp": "^0.31.3",
     "sqlite3": "^5.1.4",
     "user-agents": "^1.0.1269"
